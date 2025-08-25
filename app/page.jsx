@@ -133,7 +133,7 @@ export default function Home() {
      Testimonials
     </Badge>
     <h2 className="gradient-title mt-2 text-3xl md:text-4xl">
-      Happy Users
+      Our Happy Users
     </h2>
     
     <div className="mx-auto mt-12 grid max-w-5xl gap-6 md:grid-cols-2 lg:grid-cols-3">
