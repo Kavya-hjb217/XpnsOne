@@ -6,6 +6,7 @@ import{ zodResolver} from "@hookform/resolvers/zod";
 import {z} from "zod";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 
 
 
@@ -60,6 +61,21 @@ const CreateGroupModal = ({isOpen,onClose,onSuccess}) => {
         {errors.name && <p className="text-sm text-red-500">{errors.name.message}</p>}
 
         </div>
+        <div className="space-y-2">
+          <Label className="description">Description(Optional)</Label>
+          <Textarea id="description"
+           placeholder="Enter group description" 
+          {...register("description")} />
+          </div>
+
+          <div className="space-y-2">
+            <Label>Members</Label>
+            <div>
+              
+            </div>
+          </div>
+
+
        </form>
 
       <DialogFooter>Footer</DialogFooter>
