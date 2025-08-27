@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Plus, Users, User } from "lucide-react";
-import CreateGroupModal from './_components/create-group-modal';
+import CreateGroupModal from "./_components/create-group-modal";
 
 export default function ContactsPage() {
   const [isCreateGroupModalOpen, setIsCreateGroupModalOpen] = useState(false);
@@ -143,7 +143,7 @@ export default function ContactsPage() {
         isOpen={isCreateGroupModalOpen}
         onClose={() => setIsCreateGroupModalOpen(false)}
         onSuccess={(groupId) => {
-          router.push(`/groups/${groupId}`);
+          router.push(`/groups/${groupId}`)
         }}
       />
     </div>
