@@ -7,6 +7,10 @@ import {z} from "zod";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { useConvexQuery } from "@/hooks/use-convex-query";
+import { api } from "@/convex/_generated/api";
+import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 
 
@@ -21,6 +25,8 @@ const groupSchema = z.object({
 
 const CreateGroupModal = ({isOpen,onClose,onSuccess}) => {
 
+  const{data:currentUser}=useConvexQuery(api.users.getCurrentUser);
+  
   const {
     register,
     handleSubmit,
@@ -71,7 +77,16 @@ const CreateGroupModal = ({isOpen,onClose,onSuccess}) => {
           <div className="space-y-2">
             <Label>Members</Label>
             <div>
-              
+            {currentUser &&(
+              <Badge variant ='secondary' className="px-3 py-1">
+                <Avatar className="h-5 w-5 mr-2">
+                  <AvatarImage src={currentUser.imageUrl} />
+                  <AvatarFallback>{currentUser.name?.charAt(0) || "?"}</AvatarFallback>
+
+                </Avatar>
+                <span>{currentUser.name} (You)</span>
+              </Badge>
+            ) }
             </div>
           </div>
 
