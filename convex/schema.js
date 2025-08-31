@@ -43,6 +43,7 @@ groups: defineTable({
  name: v.string(),
  description: v.optional(v.string()),
  createdBy: v.id("users"),
+ 
  members: v.array(
    v.object({
      userId: v.id("users"),
