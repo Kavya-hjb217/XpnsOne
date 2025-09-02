@@ -1,5 +1,6 @@
 import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
+import { internal } from "./_generated/api";
 
 // Create a new group
 export const createGroup = mutation({
@@ -172,6 +173,42 @@ export const getGroupExpenses = query({
       // Update ledger: reduce what the payer owes to the receiver
       ledger[s.paidByUserId][s.receivedByUserId] -= s.amount;
     }
+
+    // Simplify the Ledger (Debt Simplification)
+    // ----------------------------------------
+    // Example with a circular debt:
+    // - Initial ledger:
+    // - user1 owes user2 $10
+    // - user2 owes user3 $15
+    // - user3 owes user1 $5
+    //
+    // - After simplification:
+    // - user1 owes user2 $5
+    // - user2 owes user3 $15
+    // - user3 owes user1 $0
+    //
+    // This reduces the circular debt pattern
+    ids.forEach((a) => {
+      ids.forEach((b) => {
+        if (a >= b) return;
+
+        // Calculate the net debt between two users
+        const diff = ledger[a][b] - ledger[b][a];
+
+        if (diff > 0) {
+          // User A owes User B (net)
+          ledger[a][b] = diff;
+          ledger[b][a] = 0;
+        } else if (diff < 0) {
+          // User B owes User A (net)
+          ledger[b][a] = -diff;
+          ledger[a][b] = 0;
+        } else{
+          //they are even 
+          ledger[a][b] = ledger[b][a] = 0;
+        }
+      });
+    });
 
     // Format Response Data
     // --------------------
