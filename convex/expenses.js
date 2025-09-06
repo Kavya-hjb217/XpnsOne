@@ -1,6 +1,6 @@
 import { v } from "convex/values";
-import { query, mutation} from "./_generated/server";
-import { internal } from "./_generated/api"; 
+import { query, mutation } from "./_generated/server";
+import { internal } from "./_generated/api";
 
 export const getExpensesBetweenUsers = query({
   args: { userId: v.id("users") },
@@ -120,5 +120,70 @@ export const deleteExpense = mutation({
     await ctx.db.delete(args.expenseId);
 
     return { success: true };
+  },
+});
+
+export const createExpense = mutation({
+  args: {
+    description: v.string(),
+    amount: v.number(),
+    category: v.optional(v.string()),
+    date: v.number(), // timestamp
+    paidByUserId: v.id("users"),
+    splitType: v.string(), // "equal", "percentage", "exact"
+    splits: v.array(
+      v.object({
+        userId: v.id("users"),
+        amount: v.number(),
+        paid: v.boolean(),
+      })
+    ),
+    groupId: v.optional(v.id("groups")),
+  },
+
+  handler: async (ctx, args) => {
+    // Use centralized getCurrentUser function
+    const user = await ctx.runQuery(internal.users.getCurrentUser);
+
+    if (args.groupId) {
+      const group = await ctx.db.get(args.groupId);
+      if (!group) {
+        throw new Error("Group not found");
+      }
+
+      const isMember = group.members.some(
+        (member) => member.userId === user._id
+      );
+
+      // The condition below is likely a bug. It should probably be if (!isMember)
+      if (!isMember) {
+        throw new Error("You are not a member of this group");
+      }
+    }
+
+    // Verify that splits add up to the total amount (with small tolerance for floating point issues)
+    const totalSplitAmount = args.splits.reduce(
+      (sum, split) => sum + split.amount,
+      0
+    );
+
+    const tolerance = 0.01; // Allow for small rounding errors
+    if (Math.abs(totalSplitAmount - args.amount) > tolerance) {
+      throw new Error("Split amounts must add up to the total expense amount");
+    }
+
+    const expenseId = await ctx.db.insert("expenses", {
+      description: args.description,
+      amount: args.amount,
+      category: args.category || "Other",
+      date: args.date,
+      paidByUserId: args.paidByUserId,
+      splitType: args.splitType,
+      splits: args.splits,
+      groupId: args.groupId,
+      createdBy: user._id,
+    });
+
+    return expenseId;
   },
 });
