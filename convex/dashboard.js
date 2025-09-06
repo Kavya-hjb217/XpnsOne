@@ -64,6 +64,16 @@ export const getUserBalances = query({
       }
     }
 
+    /* ————— GROUP BALANCES (NEW) ————— */
+    const groups = await ctx.runQuery(internal.dashboard.getUserGroups);
+    for (const g of groups) {
+      if (g.balance > 0) {
+        youAreOwed += g.balance;
+      } else if (g.balance < 0) {
+        youOwe += Math.abs(g.balance);
+      }
+    }
+
     //build lists for UI
     const youOweList = [];
     const youAreOwedList = [];
