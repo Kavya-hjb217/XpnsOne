@@ -1,23 +1,21 @@
 import { query } from "./_generated/server";
 import { internal } from "./_generated/api";
 
-//get user balances
 export const getUserBalances = query({
   handler: async (ctx) => {
     const user = await ctx.runQuery(internal.users.getCurrentUser);
-    /* ————— 1-to-1 expenses (no groupId) ————— */
-    // Filter expenses to only include one-on-one expenses (not group expenses)
-    // where the current user is either the payer or in the splits
+
+    /* ————— 1-to-1 expenses ————— */
     const expenses = (await ctx.db.query("expenses").collect()).filter(
       (e) =>
-        !e.groupId && // 1-to-1 only
+        !e.groupId &&
         (e.paidByUserId === user._id ||
           e.splits.some((s) => s.userId === user._id))
     );
 
-    let youOwe = 0; //total amount user owes others
-    let youAreOwed = 0; //total amount others owe the user
-    const balanceByUser = {}; //detailed breakdown per user// process each expense to calculate balances
+    let youOwe = 0;
+    let youAreOwed = 0;
+    const balanceByUser = {};
 
     for (const e of expenses) {
       const isPayer = e.paidByUserId === user._id;
@@ -25,25 +23,18 @@ export const getUserBalances = query({
 
       if (isPayer) {
         for (const s of e.splits) {
-          // Skip user's own split or already paid splits
           if (s.userId === user._id || s.paid) continue;
-
-          // Add to amount owed to the user
           youAreOwed += s.amount;
           (balanceByUser[s.userId] ??= { owed: 0, owing: 0 }).owed += s.amount;
         }
       } else if (mySplit && !mySplit.paid) {
-        // Someone else paid and user hasn't paid their split
         youOwe += mySplit.amount;
-
-        // Add to the amount the current user owes to the payer
         (balanceByUser[e.paidByUserId] ??= { owed: 0, owing: 0 }).owing +=
           mySplit.amount;
       }
     }
 
-    /* ————— 1-to-1 settlements (no groupId) ————— */
-    // Get settlements that directly involve the current user
+    /* ————— 1-to-1 settlements ————— */
     const settlements = (await ctx.db.query("settlements").collect()).filter(
       (s) =>
         !s.groupId &&
@@ -52,37 +43,49 @@ export const getUserBalances = query({
 
     for (const s of settlements) {
       if (s.paidByUserId === user._id) {
-        // User paid someone else -> reduces what user owes
         youOwe -= s.amount;
         (balanceByUser[s.receivedByUserId] ??= { owed: 0, owing: 0 }).owing -=
           s.amount;
       } else {
-        // Someone paid the user -> reduces what they owe the user
         youAreOwed -= s.amount;
         (balanceByUser[s.paidByUserId] ??= { owed: 0, owing: 0 }).owed -=
           s.amount;
       }
     }
 
-    /* ————— GROUP BALANCES (NEW) ————— */
+    /* ————— GROUP BALANCES ————— */
     const groups = await ctx.runQuery(internal.dashboard.getUserGroups);
+    const groupOweList = [];
+    const groupOwedList = [];
+
     for (const g of groups) {
       if (g.balance > 0) {
         youAreOwed += g.balance;
+        groupOwedList.push({
+          groupId: g._id, // ✅ changed from userId
+          name: `${g.name} (Group)`,
+          imageUrl: g.imageUrl ?? null,
+          amount: g.balance,
+        });
       } else if (g.balance < 0) {
         youOwe += Math.abs(g.balance);
+        groupOweList.push({
+          groupId: g._id, // ✅ changed from userId
+          name: `${g.name} (Group)`,
+          imageUrl: g.imageUrl ?? null,
+          amount: Math.abs(g.balance),
+        });
       }
     }
 
-    //build lists for UI
+    /* ————— Build per-user lists ————— */
     const youOweList = [];
     const youAreOwedList = [];
 
     for (const [uid, { owed, owing }] of Object.entries(balanceByUser)) {
-      const net = owed - owing; // Calculate net balance
-      if (net === 0) continue; // Skip if balanced
+      const net = owed - owing;
+      if (net === 0) continue;
 
-      // Get user details
       const counterpart = await ctx.db.get(uid);
       const base = {
         userId: uid,
@@ -94,14 +97,22 @@ export const getUserBalances = query({
       net > 0 ? youAreOwedList.push(base) : youOweList.push(base);
     }
 
+    // Merge group debts/credits (already using groupId so no Convex error)
+    youOweList.push(...groupOweList);
+    youAreOwedList.push(...groupOwedList);
+
+    // Sort
     youOweList.sort((a, b) => b.amount - a.amount);
     youAreOwedList.sort((a, b) => b.amount - a.amount);
 
     return {
-      youOwe, // Total amount user owes
-      youAreOwed, // Total amount owed to user
-      totalBalance: youAreOwed - youOwe, // Net balance
-      oweDetails: { youOwe: youOweList, youAreOwedBy: youAreOwedList }, // Detailed lists
+      youOwe,
+      youAreOwed,
+      totalBalance: youAreOwed - youOwe,
+      oweDetails: {
+        youOwe: youOweList,
+        youAreOwedBy: youAreOwedList,
+      },
     };
   },
 });

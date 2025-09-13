@@ -1,5 +1,5 @@
 import React from "react";
-import { ArrowUpCircle,ArrowDownCircle } from "lucide-react";
+import { ArrowUpCircle, ArrowDownCircle } from "lucide-react";
 import Link from "next/link";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
@@ -28,10 +28,9 @@ const BalanceSummary = ({ balances }) => {
           <div className="space-y-3">
             {oweDetails.youAreOwedBy.map((item) => (
               <Link
-                key={item.userId}
-                href={`/person/${item.userId}`}
-                className="flex items-center justify-between hover:bg-muted p-2
-              rounded-md transition-colors"
+                key={item.groupId || item.userId}
+                href={item.groupId ? `/groups/${item.groupId}` : `/person/${item.userId}`}
+                className="flex items-center justify-between hover:bg-muted p-2 rounded-md transition-colors"
               >
                 <div className="flex items-center gap-2">
                   <Avatar className="h-8 w-8">
@@ -42,13 +41,14 @@ const BalanceSummary = ({ balances }) => {
                 </div>
 
                 <span className="font-medium text-green-600">
-                  ${item.amount.toFixed(2)}
+                  ₹{item.amount.toFixed(2)}
                 </span>
               </Link>
             ))}
           </div>
         </div>
       )}
+
       {hasOwing && (
         <div>
           <h3 className="text-sm font-medium flex items-center mb-3">
@@ -58,10 +58,9 @@ const BalanceSummary = ({ balances }) => {
           <div className="space-y-3">
             {oweDetails.youOwe.map((item) => (
               <Link
-                key={item.userId}
-                href={`/person/${item.userId}`}
-                className="flex items-center justify-between hover:bg-muted p-2
-              rounded-md transition-colors"
+                key={item.groupId || item.userId}
+                href={item.groupId ? `/groups/${item.groupId}` : `/person/${item.userId}`}
+                className="flex items-center justify-between hover:bg-muted p-2 rounded-md transition-colors"
               >
                 <div className="flex items-center gap-2">
                   <Avatar className="h-8 w-8">
@@ -72,7 +71,7 @@ const BalanceSummary = ({ balances }) => {
                 </div>
 
                 <span className="font-medium text-green-600">
-                  ${item.amount.toFixed(2)}
+                  ₹{item.amount.toFixed(2)}
                 </span>
               </Link>
             ))}

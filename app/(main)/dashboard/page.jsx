@@ -66,14 +66,14 @@ const DashboardPage = () => {
                 <div className="text-2xl font-bold">
                   {balances.totalBalance > 0 ? (
                     <span className="text-green-600">
-                      {`+$${balances?.totalBalance.toFixed(2)}`}
+                      {`+₹${balances?.totalBalance.toFixed(2)}`}
                     </span>
                   ) : balances?.totalBalance < 0 ? (
                     <span className="text-red-600">
-                      {`-${Math.abs(balances.totalBalance).toFixed(2)}`}
+                      {`-₹${Math.abs(balances.totalBalance).toFixed(2)}`}
                     </span>
                   ) : (
-                    <span>$0.00</span>
+                    <span>₹0.00</span>
                   )}
                 </div>
 
@@ -94,7 +94,7 @@ const DashboardPage = () => {
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold text-green-600">
-                  {`$${balances?.youAreOwed.toFixed(2)}`}
+                  {`₹${balances?.youAreOwed.toFixed(2)}`}
                 </div>
                 <p className="text-xs text-muted-foreground mt-1">
                   From {balances?.oweDetails?.youAreOwedBy?.length || 0} people
@@ -112,7 +112,7 @@ const DashboardPage = () => {
                 {balances?.oweDetails?.youOwe?.length > 0 ? (
                   <>
                     <div className="text-2xl font-bold text-red-600">
-                      {`$${balances?.youOwe.toFixed(2)}`}
+                      {`₹${balances?.youOwe.toFixed(2)}`}
                     </div>
                     <p className="text-xs text-muted-foreground mt-1">
                       To {balances?.oweDetails?.youOwe?.length || 0} people
@@ -120,7 +120,7 @@ const DashboardPage = () => {
                   </>
                 ) : (
                   <>
-                    <div className="text-2xl font-bold">$0.00</div>
+                    <div className="text-2xl font-bold">₹0.00</div>
                     <p className="text-xs text-muted-foreground mt-1">
                       You don't owe anyone
                     </p>

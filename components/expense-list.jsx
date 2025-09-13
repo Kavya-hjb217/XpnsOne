@@ -103,7 +103,7 @@ const ExpenseList = ({
                 <div className="flex items-center gap-2">
                   <div className="text-right">
                     <div className="font-medium">
-                      ${expense.amount.toFixed(2)}
+                      ₹{expense.amount.toFixed(2)}
                     </div>
 
                     {isGroupExpense ? (
@@ -155,7 +155,7 @@ const ExpenseList = ({
                         </AvatarFallback>
                       </Avatar>
                       <span>
-                        {isCurrentUser ? "You" : splitUser.name}: $
+                        {isCurrentUser ? "You" : splitUser.name}: ₹
                         {split.amount.toFixed(2)}
                       </span>
                     </Badge>

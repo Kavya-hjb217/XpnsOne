@@ -46,7 +46,7 @@ const GroupBalances = ({ balances }) => {
   return (
     <div className="space-y-4">
       <div className="text-center pb-4 border-b">
-        <p className="text-sm text-muted-foregorund mb-1">Your Balance</p>
+        <p className="text-sm text-muted-foreground mb-1">Your Balance</p>
         <p
           className={`text-2xl font-bold ${
             me.totalBalance > 0
@@ -57,10 +57,10 @@ const GroupBalances = ({ balances }) => {
           }`}
         >
           {me.totalBalance > 0
-            ? `+$${me.totalBalance.toFixed(2)}`
+            ? `+₹${me.totalBalance.toFixed(2)}`
             : me.totalBalance < 0
-              ? `-$${Math.abs(me.totalBalance).toFixed(2)}`
-              : "$0.00"}
+              ? `-₹${Math.abs(me.totalBalance).toFixed(2)}`
+              : "₹0.00"}
         </p>
       </div>
 
@@ -93,7 +93,7 @@ const GroupBalances = ({ balances }) => {
                       <span className="text-sm">{member.name}</span>
                     </div>
                     <span className="font-medium text-green-600">
-                      ${member.amount.toFixed(2)}
+                      ₹{member.amount.toFixed(2)}
                     </span>
                   </div>
                 ))}
@@ -121,7 +121,7 @@ const GroupBalances = ({ balances }) => {
                             <span className="text-sm">{member.name}</span>
                           </div>
                           <span className="font-medium text-red-600">
-                            ${member.amount.toFixed(2)}
+                            ₹{member.amount.toFixed(2)}
                           </span>
                         </div>
                       ))}
